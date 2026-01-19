@@ -51,12 +51,32 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MODELS_DIR = PROJECT_ROOT / "models"
 DB_PATH = PROJECT_ROOT / "churn.duckdb"
 
+# Check if required files exist
+if not DB_PATH.exists():
+    st.error("❌ **Database not found!**")
+    st.error(f"Expected database at: `{DB_PATH}`")
+    st.info("💡 **Solution:** Please ensure the demo artifacts are available. Run the data generation and SQL pipeline to create the database.")
+    st.stop()
+
+RF_MODEL_PATH = MODELS_DIR / "rf_model.joblib"
+if not RF_MODEL_PATH.exists():
+    st.error("❌ **Model file not found!**")
+    st.error(f"Expected model at: `{RF_MODEL_PATH}`")
+    st.info("💡 **Solution:** Please ensure the trained model is available. Run `pipeline/train_model.py` to generate the model files.")
+    st.stop()
+
 @st.cache_data
 def load_data_and_model():
     """Load data and trained model."""
-    conn = duckdb.connect(str(DB_PATH))
-    df = conn.execute("SELECT * FROM analytics.churn_features").df()
-    conn.close()
+    try:
+        conn = duckdb.connect(str(DB_PATH))
+        df = conn.execute("SELECT * FROM analytics.churn_features").df()
+        conn.close()
+    except Exception as e:
+        st.error("❌ **Error loading database!**")
+        st.error(f"Database connection or query failed: `{str(e)}`")
+        st.info("💡 **Solution:** Please ensure the database is properly created and contains the `analytics.churn_features` table.")
+        st.stop()
     
     df_model = df[df["churn_label"].isin([0, 1])].copy()
     
@@ -102,7 +122,13 @@ def load_data_and_model():
     )
     
     preprocessor_rf.fit(X_rf)
-    model = joblib.load(MODELS_DIR / "rf_model.joblib")
+    try:
+        model = joblib.load(MODELS_DIR / "rf_model.joblib")
+    except Exception as e:
+        st.error("❌ **Error loading model!**")
+        st.error(f"Failed to load model file: `{str(e)}`")
+        st.info("💡 **Solution:** Please ensure the model file is valid and was created using `pipeline/train_model.py`.")
+        st.stop()
     
     X_processed = preprocessor_rf.transform(X_rf)
     churn_risk_scores = model.predict_proba(X_processed)[:, 1]
