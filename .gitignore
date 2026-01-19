@@ -35,7 +35,7 @@ env/
 # Data files
 *.parquet
 *.csv
-churn.duckdb
+# churn.duckdb
 
 # ML Models (keep directory structure, ignore large model files)
 models/*.joblib

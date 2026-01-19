@@ -36,10 +36,11 @@ hide_streamlit_style = """
         padding-right: 1.5rem;
     }
 
-    /* Make expanders scrollable */
+    /* Make expander content scrollable */
     .streamlit-expanderContent {
         max-height: 65vh;
         overflow-y: auto;
+        padding-right: 0.5rem;
     }
     </style>
 """
@@ -200,11 +201,20 @@ st.markdown("---")
 
 st.header("3. Retention Strategy Simulator")
 
+# ──────────────────────────────────────────────────────────────────────────────
+# SIDEBAR SECTION A: TOP - FILTER SUMMARY (STATIC)
+# ──────────────────────────────────────────────────────────────────────────────
+with st.sidebar.container():
+    st.markdown("**ℹ️ Current Selection**")
+    # Filter summary will be calculated and displayed here after filters are set
+    filter_summary_placeholder = st.empty()
+
+# ──────────────────────────────────────────────────────────────────────────────
+# SIDEBAR SECTION B: MIDDLE - SCROLLABLE SIMULATION CONTROLS (INSIDE EXPANDER)
+# ──────────────────────────────────────────────────────────────────────────────
+st.sidebar.markdown("---")
 with st.sidebar.expander("🎛️ Simulation Controls", expanded=True):
     st.caption("Configure filters, targeting, and retention strategies")
-    
-    # Filter Summary at top - will show current state
-    summary_placeholder = st.empty()
     
     # Date Filters Section  
     st.markdown("**📅 Date Filters**")
@@ -371,34 +381,46 @@ with st.sidebar.expander("🎛️ Simulation Controls", expanded=True):
     )
     if apply_feature_unlock:
         st.caption(f"💰 Cost: ${FEATURE_UNLOCK_COST} per customer per month")
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Calculate Filter Summary (after all filters are set)
+# ──────────────────────────────────────────────────────────────────────────────
+filter_summary = []
+if use_signup_filter and signup_date_range is not None and isinstance(signup_date_range, tuple) and len(signup_date_range) == 2:
+    filter_summary.append(f"📅 Signup: {signup_date_range[0]} to {signup_date_range[1]}")
+if use_last_active_filter and last_active_date_range is not None and isinstance(last_active_date_range, tuple) and len(last_active_date_range) == 2:
+    filter_summary.append(f"📅 Last Active: {last_active_date_range[0]} to {last_active_date_range[1]}")
+if filter_plan:
+    filter_summary.append(f"📦 Plans: {', '.join(filter_plan)}")
+if filter_region:
+    filter_summary.append(f"🌍 Regions: {', '.join(filter_region)}")
+
+if len(df_filtered) > 0:
+    targeted_customers_temp = df_filtered[df_filtered["churn_risk_score"] >= risk_threshold].copy()
+    max_target_count_temp = int(len(df_filtered) * max_target_pct / 100)
+    targeted_customers_temp = targeted_customers_temp.nlargest(max_target_count_temp, "churn_risk_score")
+    filter_summary.append(f"✅ Eligible: {len(df_filtered):,} customers")
+    filter_summary.append(f"🎯 Risk Threshold: ≥{risk_threshold:.2%}")
+    filter_summary.append(f"📊 Max Target: {max_target_pct}% ({max_target_count_temp:,} customers)")
+    filter_summary.append(f"✅ Selected: {len(targeted_customers_temp):,} customers")
     
-    # Update Filter Summary (calculated after all filters)
-    filter_summary = []
-    if use_signup_filter and signup_date_range is not None and isinstance(signup_date_range, tuple) and len(signup_date_range) == 2:
-        filter_summary.append(f"📅 Signup: {signup_date_range[0]} to {signup_date_range[1]}")
-    if use_last_active_filter and last_active_date_range is not None and isinstance(last_active_date_range, tuple) and len(last_active_date_range) == 2:
-        filter_summary.append(f"📅 Last Active: {last_active_date_range[0]} to {last_active_date_range[1]}")
-    if filter_plan:
-        filter_summary.append(f"📦 Plans: {', '.join(filter_plan)}")
-    if filter_region:
-        filter_summary.append(f"🌍 Regions: {', '.join(filter_region)}")
-    
-    if len(df_filtered) > 0:
-        targeted_customers_temp = df_filtered[df_filtered["churn_risk_score"] >= risk_threshold].copy()
-        max_target_count_temp = int(len(df_filtered) * max_target_pct / 100)
-        targeted_customers_temp = targeted_customers_temp.nlargest(max_target_count_temp, "churn_risk_score")
-        filter_summary.append(f"✅ Eligible: {len(df_filtered):,} customers")
-        filter_summary.append(f"🎯 Risk Threshold: ≥{risk_threshold:.2%}")
-        filter_summary.append(f"📊 Max Target: {max_target_pct}% ({max_target_count_temp:,} customers)")
-        filter_summary.append(f"✅ Selected: {len(targeted_customers_temp):,} customers")
-    else:
-        filter_summary.append("⚠️ **No customers match current filters**")
-    
-    # Update the placeholder at top with summary
-    with summary_placeholder.container():
-        st.markdown("**ℹ️ Filter Summary**")
+    # Add retention levers info
+    if apply_discount:
+        filter_summary.append(f"💰 Discount: {discount_pct}%")
+    if apply_priority_support:
+        filter_summary.append(f"💰 Priority Support: Active")
+    if apply_feature_unlock:
+        filter_summary.append(f"💰 Feature Unlock: Active")
+else:
+    filter_summary.append("⚠️ **No customers match current filters**")
+
+# Update Filter Summary at top
+with filter_summary_placeholder.container():
+    if filter_summary:
         for summary in filter_summary:
             st.caption(summary)
+    else:
+        st.caption("Configure filters below to see selection summary")
 
 # Calculate final targeted customers outside expander
 if len(df_filtered) > 0:
@@ -409,6 +431,9 @@ else:
     targeted_customers = pd.DataFrame()
     max_target_count = 0
 
+# ──────────────────────────────────────────────────────────────────────────────
+# SIDEBAR SECTION C: BOTTOM - STATIC INFO (ABOUT & CONNECT)
+# ──────────────────────────────────────────────────────────────────────────────
 st.sidebar.markdown("---")
 with st.sidebar.expander("📋 About Project", expanded=False):
     st.markdown("<h3 style='text-align: center;'>Churn & Retention Analytics</h3>", unsafe_allow_html=True)
