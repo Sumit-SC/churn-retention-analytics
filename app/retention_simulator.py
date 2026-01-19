@@ -489,79 +489,88 @@ with st.sidebar.expander("📋 About Project", expanded=False):
 
 st.sidebar.markdown("---")
 with st.sidebar.expander("🔗 Connect with Me", expanded=False):
-    icon_col1, icon_col2, icon_col3, icon_col4, icon_col5 = st.columns(5)
-
-with icon_col1:
-    st.markdown("""
-    <div style="text-align: center;">
-        <a href="https://github.com/Sumit-SC" target="_blank">
-            <img src="https://mitsus-.life-is-pa.in/7s66cDoBZ.png" 
-                 style="width: 50px; height: 50px; cursor: pointer; transition: transform 0.2s;" 
-                 onmouseover="this.style.transform='scale(1.1)'" 
-                 onmouseout="this.style.transform='scale(1)'"
-                 alt="Github">
-        </a>
-        <p style="margin-top: 5px; font-size: 0.75em;">Github</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with icon_col2:
-    st.markdown("""
-    <div style="text-align: center;">
-        <a href="https://www.kaggle.com/mitsu00" target="_blank">
-            <img src="https://mitsus-.life-is-pa.in/7s65GCpDu.png" 
-                 style="width: 50px; height: 50px; cursor: pointer; transition: transform 0.2s;" 
-                 onmouseover="this.style.transform='scale(1.1)'" 
-                 onmouseout="this.style.transform='scale(1)'"
-                 alt="Kaggle">
-        </a>
-        <p style="margin-top: 5px; font-size: 0.75em;">Kaggle</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with icon_col3:
-    st.markdown("""
-    <div style="text-align: center;">
-        <a href="https://www.linkedin.com/in/sumitsc/" target="_blank">
-            <img src="https://mitsus-.life-is-pa.in/7s65TFl9W.png" 
-                 style="width: 50px; height: 50px; cursor: pointer; transition: transform 0.2s;" 
-                 onmouseover="this.style.transform='scale(1.1)'" 
-                 onmouseout="this.style.transform='scale(1)'"
-                 alt="LinkedIn">
-        </a>
-        <p style="margin-top: 5px; font-size: 0.75em;">LinkedIn</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with icon_col4:
-    st.markdown("""
-    <div style="text-align: center;">
-        <a href="mailto:sumitsc.work@gmail.com">
-            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
-                 style="cursor: pointer; transition: transform 0.2s;" 
-                 onmouseover="this.style.transform='scale(1.1)'" 
-                 onmouseout="this.style.transform='scale(1)'">
-                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="#EA4335"/>
-            </svg>
-        </a>
-        <p style="margin-top: 5px; font-size: 0.75em;">Email</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-with icon_col5:
-    st.markdown("""
-    <div style="text-align: center;">
-        <a href="https://www.datascienceportfolio.io/" target="_blank">
-            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
-                 style="cursor: pointer; transition: transform 0.2s;" 
-                 onmouseover="this.style.transform='scale(1.1)'" 
-                 onmouseout="this.style.transform='scale(1)'">
-                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z" fill="#4285F4"/>
-            </svg>
-        </a>
-        <p style="margin-top: 5px; font-size: 0.75em;">Website</p>
-    </div>
-    """, unsafe_allow_html=True)
+    # Professional layout: 2 rows for better spacing
+    # Row 1: LinkedIn, GitHub, Email
+    row1_col1, row1_col2, row1_col3 = st.columns(3)
+    # Row 2: Website, Kaggle
+    row2_col1, row2_col2, row2_col3 = st.columns([1, 1, 1])
+    
+    # Row 1 - Primary professional links
+    with row1_col1:
+        st.markdown("""
+        <div style="text-align: center;">
+            <a href="https://www.linkedin.com/in/sumitsc/" target="_blank">
+                <img src="https://mitsus-.life-is-pa.in/7s65TFl9W.png" 
+                     style="width: 45px; height: 45px; cursor: pointer; transition: transform 0.2s;" 
+                     onmouseover="this.style.transform='scale(1.1)'" 
+                     onmouseout="this.style.transform='scale(1)'"
+                     alt="LinkedIn">
+            </a>
+            <p style="margin-top: 5px; font-size: 0.7em; color: #666;">LinkedIn</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with row1_col2:
+        st.markdown("""
+        <div style="text-align: center;">
+            <a href="https://github.com/Sumit-SC" target="_blank">
+                <img src="https://mitsus-.life-is-pa.in/7s66cDoBZ.png" 
+                     style="width: 45px; height: 45px; cursor: pointer; transition: transform 0.2s;" 
+                     onmouseover="this.style.transform='scale(1.1)'" 
+                     onmouseout="this.style.transform='scale(1)'"
+                     alt="Github">
+            </a>
+            <p style="margin-top: 5px; font-size: 0.7em; color: #666;">GitHub</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with row1_col3:
+        st.markdown("""
+        <div style="text-align: center;">
+            <a href="mailto:sumitsc.work@gmail.com">
+                <svg width="45" height="45" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                     style="cursor: pointer; transition: transform 0.2s;" 
+                     onmouseover="this.style.transform='scale(1.1)'" 
+                     onmouseout="this.style.transform='scale(1)'">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" fill="#EA4335"/>
+                </svg>
+            </a>
+            <p style="margin-top: 5px; font-size: 0.7em; color: #666;">Email</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Row 2 - Portfolio and Data Science
+    with row2_col1:
+        st.markdown("""
+        <div style="text-align: center;">
+            <a href="http://sumit.indevs.in/" target="_blank">
+                <svg width="45" height="45" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" 
+                     style="cursor: pointer; transition: transform 0.2s;" 
+                     onmouseover="this.style.transform='scale(1.1)'" 
+                     onmouseout="this.style.transform='scale(1)'">
+                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z" fill="#4285F4"/>
+                </svg>
+            </a>
+            <p style="margin-top: 5px; font-size: 0.7em; color: #666;">Website</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with row2_col2:
+        st.markdown("""
+        <div style="text-align: center;">
+            <a href="https://www.kaggle.com/mitsu00" target="_blank">
+                <img src="https://mitsus-.life-is-pa.in/7s65GCpDu.png" 
+                     style="width: 45px; height: 45px; cursor: pointer; transition: transform 0.2s;" 
+                     onmouseover="this.style.transform='scale(1.1)'" 
+                     onmouseout="this.style.transform='scale(1)'"
+                     alt="Kaggle">
+            </a>
+            <p style="margin-top: 5px; font-size: 0.7em; color: #666;">Kaggle</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with row2_col3:
+        st.markdown("")  # Empty column for spacing
 
 st.subheader("Targeted Customers")
 if len(targeted_customers) > 0:
