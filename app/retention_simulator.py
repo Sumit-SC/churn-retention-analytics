@@ -23,17 +23,44 @@ st.markdown(
     <style>
     /* Hide Streamlit footer (Created by…) */
     footer {
-        visibility: hidden;
+        visibility: hidden !important;
+    }
+    
+    /* Hide footer elements */
+    footer[data-testid="stFooter"] {
+        display: none !important;
     }
 
-    /* Hide Streamlit deploy button */
+    /* Hide Streamlit deploy button (newer versions) */
+    .stAppDeployButton {
+        display: none !important;
+        visibility: hidden !important;
+    }
+    
+    /* Hide Streamlit deploy button (older versions) */
     .stDeployButton {
-        display: none;
+        display: none !important;
+        visibility: hidden !important;
     }
-
+    
+    /* Hide fork button and GitHub menu */
+    #MainMenu {
+        visibility: hidden !important;
+    }
+    
+    /* Hide menu button */
+    button[title="View the source code"] {
+        display: none !important;
+    }
+    
     /* Hide top decoration bar */
     #stDecoration {
-        display: none;
+        display: none !important;
+    }
+    
+    /* Hide header menu */
+    header[data-testid="stHeader"] {
+        display: none !important;
     }
 
     /* Improve main content padding slightly */
