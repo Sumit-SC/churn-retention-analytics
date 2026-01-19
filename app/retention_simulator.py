@@ -18,16 +18,23 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-hide_streamlit_style = """
+st.markdown(
+    """
     <style>
-    /* Hide footer */
-    footer {visibility: hidden;}
+    /* Hide Streamlit footer (Created by…) */
+    footer {
+        visibility: hidden;
+    }
 
-    /* Hide deploy button */
-    .stDeployButton {display: none;}
+    /* Hide Streamlit deploy button */
+    .stDeployButton {
+        display: none;
+    }
 
-    /* Hide top decoration */
-    #stDecoration {display: none;}
+    /* Hide top decoration bar */
+    #stDecoration {
+        display: none;
+    }
 
     /* Improve main content padding slightly */
     .main .block-container {
@@ -43,8 +50,9 @@ hide_streamlit_style = """
         padding-right: 0.5rem;
     }
     </style>
-"""
-st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+    """,
+    unsafe_allow_html=True
+)
 
 # Get project root (parent of app folder)
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -999,3 +1007,9 @@ if len(targeted_customers) > 0:
     """)
 else:
     st.warning("No customers match the current targeting criteria. Adjust risk threshold or max target percentage.")
+
+# Custom Footer
+st.markdown(
+    "<div style='text-align:center; color: #888; font-size: 0.8em;'>© 2026 Sumit— Churn & Retention Analytics</div>",
+    unsafe_allow_html=True
+)
