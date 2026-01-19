@@ -107,11 +107,16 @@ for chunk_start in range(0, n_days, 30):
     # Generate sessions (Poisson)
     usage_chunk["sessions"] = np.random.poisson(plan_sessions_vec.values)
     
-    # Generate usage_minutes (Normal, clipped to non-negative)
+    # Generate usage_minutes (truncated normal to prevent extreme outliers)
+    usage_mean = plan_minutes_vec.values
+    usage_std = usage_mean * 0.3
+    usage_minutes_raw = np.random.normal(usage_mean, usage_std)
+    # Cap at 3 standard deviations above mean for realistic bounds
+    usage_max = usage_mean + (usage_std * 3)
     usage_chunk["usage_minutes"] = np.clip(
-        np.random.normal(plan_minutes_vec.values, plan_minutes_vec.values * 0.3),
+        usage_minutes_raw,
         a_min=0,
-        a_max=None
+        a_max=usage_max
     ).astype(int)
     
     # Generate feature_events (correlated with sessions)

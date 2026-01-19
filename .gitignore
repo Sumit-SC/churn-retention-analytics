@@ -37,6 +37,13 @@ env/
 *.csv
 churn.duckdb
 
+# ML Models (keep directory structure, ignore large model files)
+models/*.joblib
+models/*.pkl
+models/*.h5
+models/*.pb
+!models/.gitkeep
+
 # OS files
 .DS_Store
 Thumbs.db
