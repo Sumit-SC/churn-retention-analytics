@@ -1,24 +1,8 @@
--- ============================================================
--- STAGE 3: ANALYTICS LAYER (DuckDB)
--- ------------------------------------------------------------
--- Purpose:
--- - Recreate the `analytics` schema
--- - Build a single customer-level feature table: analytics.churn_features
--- - Designed for efficient execution on millions of rows
--- ============================================================
-
 DROP SCHEMA IF EXISTS analytics CASCADE;
 CREATE SCHEMA analytics;
 
--- Build churn_features with explicit cleaning CTEs before aggregation
 CREATE TABLE analytics.churn_features AS
 WITH
--- ============================================================
--- USAGE CLEANING
--- - Replace negative usage_minutes with NULL
--- - Cap usage_minutes at 99.9th percentile
--- - Fix sessions = 0 when usage_minutes > 0 by setting sessions = 1
--- ============================================================
 usage_percentiles AS (
     SELECT
         PERCENTILE_CONT(0.999) WITHIN GROUP (ORDER BY usage_minutes) AS p999_minutes
@@ -28,13 +12,11 @@ usage_clean AS (
     SELECT
         u.customer_id,
         u.date,
-        -- clean usage_minutes
         CASE
             WHEN u.usage_minutes < 0 THEN NULL
             WHEN u.usage_minutes > up.p999_minutes THEN CAST(up.p999_minutes AS INTEGER)
             ELSE u.usage_minutes
         END AS usage_minutes_clean,
-        -- clean sessions
         CASE
             WHEN u.sessions = 0 AND u.usage_minutes > 0 THEN 1
             ELSE u.sessions
@@ -43,8 +25,6 @@ usage_clean AS (
     FROM staging.usage_daily AS u
     CROSS JOIN usage_percentiles AS up
 ),
-
--- Aggregate usage after cleaning
 usage_agg AS (
     SELECT
         customer_id,
@@ -55,25 +35,28 @@ usage_agg AS (
     FROM usage_clean
     GROUP BY customer_id
 ),
+observation_date AS (
+    SELECT MAX(date) AS obs_date
+    FROM staging.usage_daily
+),
+max_date AS (
+    SELECT MAX(date) AS max_usage_date
+    FROM usage_clean
+),
 usage_trends AS (
     SELECT
-        customer_id,
-        AVG(usage_minutes_clean) FILTER (
-            WHERE date >= CURRENT_DATE - INTERVAL '30 days'
+        uc.customer_id,
+        AVG(uc.usage_minutes_clean) FILTER (
+            WHERE uc.date >= md.max_usage_date - INTERVAL '30 days'
         ) AS avg_usage_last_30d,
-        AVG(usage_minutes_clean) FILTER (
-            WHERE date >= CURRENT_DATE - INTERVAL '60 days'
-              AND date <  CURRENT_DATE - INTERVAL '30 days'
+        AVG(uc.usage_minutes_clean) FILTER (
+            WHERE uc.date >= md.max_usage_date - INTERVAL '60 days'
+              AND uc.date <  md.max_usage_date - INTERVAL '30 days'
         ) AS avg_usage_prev_30d
-    FROM usage_clean
-    GROUP BY customer_id
+    FROM usage_clean AS uc
+    CROSS JOIN max_date AS md
+    GROUP BY uc.customer_id
 ),
-
--- ============================================================
--- BILLING CLEANING
--- - Flag paid zero-amount bills
--- - Remove exact duplicate rows
--- ============================================================
 billing_clean AS (
     SELECT DISTINCT
         b.customer_id,
@@ -89,30 +72,26 @@ billing_clean AS (
 
 billing_agg AS (
     SELECT
-        customer_id,
+        bc.customer_id,
         SUM(
             CASE
-                WHEN payment_status IN ('late', 'failed') THEN 1
+                WHEN bc.payment_status IN ('late', 'failed') THEN 1
                 ELSE 0
             END
         ) AS total_payment_issues,
         SUM(
             CASE
-                WHEN payment_status = 'failed'
-                     AND bill_date >= CURRENT_DATE - INTERVAL '30 days'
+                WHEN bc.payment_status = 'failed'
+                     AND bc.bill_date >= md.max_usage_date - INTERVAL '30 days'
                 THEN 1
                 ELSE 0
             END
         ) AS failed_payments_30d,
-        SUM(is_zero_paid_flag) AS zero_paid_anomalies
-    FROM billing_clean
-    GROUP BY customer_id
+        SUM(bc.is_zero_paid_flag) AS zero_paid_anomalies
+    FROM billing_clean AS bc
+    CROSS JOIN max_date AS md
+    GROUP BY bc.customer_id
 ),
-
--- ============================================================
--- SUPPORT CLEANING
--- - Remove tickets before signup_date
--- ============================================================
 support_clean AS (
     SELECT
         s.customer_id,
@@ -138,17 +117,11 @@ support_agg AS (
     FROM support_clean
     GROUP BY customer_id
 )
-
--- ============================================================
--- FINAL SELECT: join features back to customers
--- ============================================================
 SELECT
     c.customer_id,
     c.signup_date,
     c.plan,
     c.region,
-
-    -- Usage-level features (cleaned)
     ua.last_active_date,
     ua.active_days,
     ua.avg_sessions,
@@ -157,24 +130,19 @@ SELECT
     ut.avg_usage_last_30d,
     ut.avg_usage_prev_30d,
     (ut.avg_usage_last_30d - ut.avg_usage_prev_30d) AS usage_trend_30d,
-
-    -- Billing features (with flags)
     ba.total_payment_issues,
     ba.failed_payments_30d,
     ba.zero_paid_anomalies,
-
-    -- Support features (cleaned)
     sa.total_tickets,
     sa.high_priority_tickets,
-
-    -- Recency and churn label
-    DATE_DIFF('day', ua.last_active_date, CURRENT_DATE) AS recency_days,
+    DATE_DIFF('day', ua.last_active_date, od.obs_date) AS recency_days,
     CASE
-        WHEN DATE_DIFF('day', ua.last_active_date, CURRENT_DATE) > 45 THEN 1
-        WHEN DATE_DIFF('day', ua.last_active_date, CURRENT_DATE) < 30 THEN 0
+        WHEN DATE_DIFF('day', ua.last_active_date, od.obs_date) > 45 THEN 1
+        WHEN DATE_DIFF('day', ua.last_active_date, od.obs_date) < 30 THEN 0
         ELSE NULL
     END AS churn_label
 FROM staging.customers AS c
+CROSS JOIN observation_date AS od
 LEFT JOIN usage_agg    AS ua ON c.customer_id = ua.customer_id
 LEFT JOIN usage_trends AS ut ON c.customer_id = ut.customer_id
 LEFT JOIN billing_agg  AS ba ON c.customer_id = ba.customer_id

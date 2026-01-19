@@ -1,24 +1,6 @@
--- ============================================================
--- STAGE 2: STAGING LAYER (DuckDB)
--- ------------------------------------------------------------
--- Purpose:
--- - Recreate the `staging` schema
--- - Materialize raw Parquet sources into DuckDB staging tables
---
--- Non-goals (by design):
--- - No aggregation
--- - No churn definition / churn computation
--- - No feature engineering
--- ============================================================
-
--- Recreate schema to keep runs deterministic
 DROP SCHEMA IF EXISTS staging CASCADE;
 CREATE SCHEMA staging;
 
--- ------------------------------------------------------------
--- staging.customers
--- Source: data/raw/customers.parquet
--- ------------------------------------------------------------
 CREATE TABLE staging.customers AS
 SELECT
   CAST(customer_id AS BIGINT)    AS customer_id,
@@ -27,10 +9,6 @@ SELECT
   CAST(region AS VARCHAR)        AS region
 FROM read_parquet('data/raw/customers.parquet');
 
--- ------------------------------------------------------------
--- staging.usage_daily
--- Source: data/raw/usage_daily.parquet
--- ------------------------------------------------------------
 CREATE TABLE staging.usage_daily AS
 SELECT
   CAST(customer_id AS BIGINT)        AS customer_id,
@@ -52,10 +30,6 @@ SELECT
   CAST(payment_status AS VARCHAR) AS payment_status
 FROM read_parquet('data/raw/billing.parquet');
 
--- ------------------------------------------------------------
--- staging.support
--- Source: data/raw/support.parquet
--- ------------------------------------------------------------
 CREATE TABLE staging.support AS
 SELECT
   CAST(customer_id AS BIGINT)  AS customer_id,

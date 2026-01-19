@@ -1,20 +1,5 @@
--- ============================================================
--- DATA QUALITY CHECKS (DuckDB)
--- ------------------------------------------------------------
--- Purpose:
--- - Create `dq` schema for data quality results
--- - Run checks on staging tables and output issue counts
--- - Do NOT clean data, only report issues
--- ============================================================
-
--- Create schema if not exists
 CREATE SCHEMA IF NOT EXISTS dq;
 
--- ============================================================
--- USAGE_DAILY QUALITY CHECKS
--- ============================================================
-
--- Check 1: Negative usage_minutes (should never happen)
 CREATE OR REPLACE TABLE dq.usage_daily_negative_minutes AS
 SELECT
     COUNT(*) AS issue_count,
@@ -23,7 +8,6 @@ SELECT
 FROM staging.usage_daily
 WHERE usage_minutes < 0;
 
--- Check 2: Usage minutes above 99.9th percentile (potential outliers)
 CREATE OR REPLACE TABLE dq.usage_daily_extreme_minutes AS
 WITH percentile_calc AS (
     SELECT
@@ -37,7 +21,6 @@ SELECT
 FROM staging.usage_daily, percentile_calc
 WHERE usage_minutes > p999_minutes;
 
--- Check 3: Sessions = 0 but usage_minutes > 0 (logical inconsistency)
 CREATE OR REPLACE TABLE dq.usage_daily_session_mismatch AS
 SELECT
     COUNT(*) AS issue_count,
@@ -46,11 +29,6 @@ SELECT
 FROM staging.usage_daily
 WHERE sessions = 0 AND usage_minutes > 0;
 
--- ============================================================
--- BILLING QUALITY CHECKS
--- ============================================================
-
--- Check 4: Paid bills with zero amount (should be free plan or error)
 CREATE OR REPLACE TABLE dq.billing_zero_paid AS
 SELECT
     COUNT(*) AS issue_count,
@@ -59,7 +37,6 @@ SELECT
 FROM staging.billing
 WHERE amount = 0 AND payment_status = 'paid';
 
--- Check 5: Duplicate (customer_id, bill_date) pairs
 CREATE OR REPLACE TABLE dq.billing_duplicates AS
 WITH duplicate_counts AS (
     SELECT
@@ -76,11 +53,6 @@ SELECT
     'billing' AS table_name
 FROM duplicate_counts;
 
--- ============================================================
--- SUPPORT QUALITY CHECKS
--- ============================================================
-
--- Check 6: Tickets created before customer signup (temporal inconsistency)
 CREATE OR REPLACE TABLE dq.support_pre_signup_tickets AS
 SELECT
     COUNT(*) AS issue_count,
@@ -90,10 +62,6 @@ FROM staging.support AS s
 INNER JOIN staging.customers AS c
     ON s.customer_id = c.customer_id
 WHERE s.ticket_date < c.signup_date;
-
--- ============================================================
--- SUMMARY TABLE: All data quality issues
--- ============================================================
 
 CREATE OR REPLACE TABLE dq.data_quality_summary AS
 SELECT * FROM dq.usage_daily_negative_minutes

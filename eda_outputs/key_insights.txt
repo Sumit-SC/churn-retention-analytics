@@ -1,0 +1,11 @@
+KEY INSIGHTS - CHURN & RETENTION ANALYSIS
+================================================================================
+
+• Plan 'Free' has the highest churn rate (13.2%), while 'Enterprise' has the lowest (0.9%)
+• Region 'APAC' shows the highest churn rate (7.7%)
+• 6.3% of customers are in At Risk (31–45d) stage, representing a key intervention opportunity
+• Plan 'Free' has the highest concentration of At Risk customers (8.8% of plan customers)
+• Churned customers show nan min/day usage trend vs 0.00 for active customers (median)
+• Churned customers have median 6 support tickets vs 4 for active customers
+• Overall churn rate: 7.58% (7,020 churned / 85,590 active)
+• Churned customers have median recency of 63 days vs 5 days for active customers

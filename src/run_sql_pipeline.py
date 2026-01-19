@@ -13,7 +13,11 @@ def read_sql_file(path: Path) -> str:
 
 
 def execute_sql_scripts(conn: duckdb.DuckDBPyConnection) -> None:
-    for sql_path in (SQL_DIR / "staging.sql", SQL_DIR / "churn_features.sql"):
+    for sql_path in (
+        SQL_DIR / "staging.sql",
+        SQL_DIR / "data_quality.sql",
+        SQL_DIR / "churn_features.sql",
+    ):
         sql_text = read_sql_file(sql_path)
         for statement in sql_text.split(";"):
             stmt = statement.strip()
@@ -81,7 +85,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-"""
-SQL pipeline runner for executing staging and feature engineering queries.
-"""

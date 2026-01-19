@@ -72,29 +72,107 @@ After this finishes, you should see the four Parquet files in `data/raw/`. The s
 
 ---
 
-## `run_sql_pipeline.py` – SQL staging and feature pipeline (overview)
+## `run_sql_pipeline.py` – SQL pipeline orchestrator
 
-**Intended role**
+**Purpose**
 
-- Orchestrate **Stage 2+** transformations:
-  - Read raw Parquet files from `data/raw/`.
-  - Execute SQL in:
-    - `sql/staging.sql` – build cleaned, joined **staging** tables.
-    - `sql/churn_features.sql` – build customer‑level **feature tables** for churn modeling and analytics.
-  - Write results to:
-    - `data/staging/`
-    - `data/analytics/`
+Orchestrates **Stage 2–3 SQL transformations** by executing SQL files in order and exporting results.
 
-**High-level flow (design)**
+**What it does**
 
-1. Load `customers.parquet`, `usage_daily.parquet`, `billing.parquet`, `support.parquet` from `data/raw/`.
-2. Register them as tables in an in‑process SQL engine (e.g., DuckDB, SQLite, or similar).
-3. Run the SQL files in `sql/` to:
-   - Create normalized / denoised staging tables.
-   - Aggregate to customer‑level features (usage, billing, support behavior, plan/region, etc.).
-4. Persist the resulting tables as Parquet (or a database) under `data/staging` and `data/analytics`.
+1. **Connects to DuckDB** – Creates/connects to `churn.duckdb` database file in project root
+2. **Executes SQL files in order:**
+   - `sql/staging.sql` – Loads raw Parquet into DuckDB `staging.*` tables
+   - `sql/data_quality.sql` – Runs data quality checks, creates `dq.*` tables
+   - `sql/churn_features.sql` – Cleans data, aggregates features, creates `analytics.churn_features`
+3. **Uses DuckDB's `read_parquet()`** – Reads Parquet files directly in SQL (no pandas loading)
+4. **Prints row counts** – Shows counts for staging tables and analytics table
+5. **Exports final table** – Writes `analytics.churn_features` to `data/analytics/churn_features.parquet`
 
-> Note: The exact implementation details of `run_sql_pipeline.py` may evolve, but this README documents the **intended contract** between:
-> - **Stage 1** Python generators (`data/raw/`),
-> - and the **SQL-based** staging / feature engineering steps (`sql/` → `data/staging`, `data/analytics`).
+**How to run**
+
+From project root:
+
+```bash
+python src/run_sql_pipeline.py
+```
+
+**Prerequisites**
+
+- Stage 1 completed (raw Parquet files in `data/raw/`)
+- DuckDB installed (`pip install duckdb` or via `uv sync`)
+
+**Outputs**
+
+- DuckDB database: `churn.duckdb` (contains `staging`, `dq`, and `analytics` schemas)
+- Parquet export: `data/analytics/churn_features.parquet`
+
+**For detailed SQL pipeline documentation, see `sql/README.md`**
+
+---
+
+## `eda.py` – Exploratory Data Analysis
+
+**Purpose**
+
+Performs comprehensive EDA on cleaned churn features from `analytics.churn_features`. Generates visualizations and insights for reports and dashboards.
+
+**Visualization Strategy**
+
+- **Static plots (Seaborn/Matplotlib)**: Used for distribution analysis and explanatory visualizations that benefit from publication-quality static outputs. Saved as PNG for reports and presentations.
+- **Interactive plots (Plotly)**: Used selectively for categorical comparisons (plan, region) and specialized visualizations (funnel) where interactivity adds value. Saved as HTML for dashboards.
+- **No hypothesis testing**: This is exploratory analysis focused on pattern discovery, not statistical inference.
+
+**What it does**
+
+1. **Loads data** from `analytics.churn_features` in DuckDB
+2. **Filters data** based on `INCLUDE_SOFT_CHURN` config (default: excludes NULL churn_label)
+3. **Creates lifecycle view** with `lifecycle_stage` (Active, At Risk 31–45d, Churned) based on recency_days
+4. **Generates visualizations**:
+   - Lifecycle Distribution (static Seaborn countplot)
+   - Lifecycle by Plan (interactive Plotly stacked bar chart)
+   - Recency Density by Lifecycle (static Seaborn KDE plot)
+   - Churn by Plan (interactive Plotly bar chart)
+   - Churn by Region (interactive Plotly bar chart)
+   - Usage Trend Distribution (static Seaborn histogram with KDE)
+   - Recency Distribution (static Seaborn boxplot)
+   - Retention Funnel (interactive Plotly funnel chart using lifecycle stages)
+   - Support Load Distribution (static Seaborn boxplot)
+5. **Extracts insights** including lifecycle-focused findings and saves to `key_insights.txt`
+
+**Configuration**
+
+- `INCLUDE_SOFT_CHURN`: If `False`, filters to only customers with non-null `churn_label` (excludes "uncertain" 30-45 day window). If `True`, includes all customers.
+
+**How to run**
+
+From project root:
+
+```bash
+python src/eda.py
+```
+
+**Prerequisites**
+
+- Stage 2-3 SQL pipeline completed (`analytics.churn_features` table exists in DuckDB)
+- Required Python packages: `duckdb`, `pandas`, `matplotlib`, `seaborn`, `plotly`
+
+**Outputs**
+
+All outputs saved to `eda_outputs/`:
+
+- `lifecycle_distribution.png` (static Seaborn)
+- `lifecycle_by_plan.html` (interactive Plotly)
+- `recency_kde.png` (static Seaborn)
+- `churn_by_plan.html` (interactive Plotly)
+- `churn_by_region.html` (interactive Plotly)
+- `usage_trend_distribution.png` (static Seaborn)
+- `recency_distribution.png` (static Seaborn)
+- `retention_funnel.html` (interactive Plotly)
+- `support_load_distribution.png` (static Seaborn)
+- `key_insights.txt` (text summary)
+
+**Runtime**
+
+Designed to complete in < 30 seconds for typical datasets.
 
