@@ -69,3 +69,7 @@ logs/
 # Explicitly do NOT ignore these files
 !uv.lock
 !pyproject.toml
+
+# Allow demo artifacts
+!churn.duckdb
+!models/*.joblib
