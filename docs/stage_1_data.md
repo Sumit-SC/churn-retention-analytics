@@ -18,7 +18,7 @@ Stage 1 generates realistic synthetic SaaS customer data with retention probabil
 
 ## Implementation
 
-**File:** `src/data_generator.py`
+**File:** `pipeline/data_generator.py`
 
 ### Data Generation Logic
 
@@ -69,7 +69,7 @@ All files saved to `data/raw/`:
 ## How to Run
 
 ```bash
-python src/data_generator.py
+python pipeline/data_generator.py
 ```
 
 **Runtime:** ~10–15 seconds

@@ -100,16 +100,16 @@ pip install -e .
 ### Full Pipeline Execution
 ```bash
 # Stage 1: Generate synthetic data
-python src/data_generator.py
+python pipeline/data_generator.py
 
 # Stage 2: SQL pipeline (staging → features)
-python src/run_sql_pipeline.py
+python pipeline/run_sql_pipeline.py
 
 # Stage 3: Exploratory data analysis
 python src/eda.py
 
 # Stage 4: Train models
-python src/train_model.py
+python pipeline/train_model.py
 
 # Stage 5: Launch retention simulator
 streamlit run app/retention_simulator.py
@@ -123,11 +123,12 @@ streamlit run app/retention_simulator.py
 
 ```
 churn-retention-analytics/
-├── src/                    # Python modules
-│   ├── data_generator.py  # Stage 1
-│   ├── run_sql_pipeline.py # Stage 2
-│   ├── eda.py              # Stage 3
-│   ├── train_model.py      # Stage 4
+├── pipeline/               # Pipeline execution scripts
+│   ├── data_generator.py  # Stage 1: Generate synthetic data
+│   ├── run_sql_pipeline.py # Stage 2: SQL transformation pipeline
+│   └── train_model.py     # Stage 4: Train ML models
+├── src/                    # Python modules & analysis
+│   ├── eda.py              # Stage 3: Exploratory data analysis
 │   └── README.md
 ├── sql/                    # SQL transformation pipeline
 │   ├── staging.sql

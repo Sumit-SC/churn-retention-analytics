@@ -18,7 +18,7 @@ Stage 4 trains baseline and advanced churn prediction models using the cleaned f
 
 ## Feature Engineering
 
-**File:** `src/train_model.py`
+**File:** `pipeline/train_model.py`
 
 ### Base Features (Both Models)
 
@@ -131,7 +131,7 @@ Stage 4 trains baseline and advanced churn prediction models using the cleaned f
 ## How to Run
 
 ```bash
-python src/train_model.py
+python pipeline/train_model.py
 ```
 
 **Runtime:** < 60 seconds

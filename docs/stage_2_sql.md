@@ -18,7 +18,7 @@ Stage 2 transforms raw Parquet data through a SQL-based pipeline using DuckDB. T
 
 ## Pipeline Steps
 
-**Orchestrator:** `src/run_sql_pipeline.py`
+**Orchestrator:** `pipeline/run_sql_pipeline.py`
 
 ### Step 1: Staging (`sql/staging.sql`)
 
@@ -121,7 +121,7 @@ All time-based calculations (30-day trends, recency, churn labeling) use `observ
 ## How to Run
 
 ```bash
-python src/run_sql_pipeline.py
+python pipeline/run_sql_pipeline.py
 ```
 
 **Runtime:** ~5–10 seconds
