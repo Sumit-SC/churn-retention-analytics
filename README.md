@@ -52,6 +52,20 @@ For detailed technical documentation, see stage-specific guides:
 
 ---
 
+## Documentation Index
+
+- **Stages overview:** `docs/README.md`
+- **Streamlit app:** `app/README.md`
+- **Pipeline scripts:** `pipeline/README.md`
+- **Core modules:** `src/README.md`
+- **SQL layer:** `sql/README.md`
+- **Data layout:** `data/README.md`
+- **Notebooks:** `notebooks/README.md`
+- **Model artifacts:** `models/README.md`
+- **EDA outputs:** `eda_outputs/README.md`
+
+---
+
 ## Key Results (Summary)
 
 ### Dataset Statistics
