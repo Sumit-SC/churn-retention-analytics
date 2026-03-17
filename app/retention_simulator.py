@@ -21,11 +21,31 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    /* Hide Streamlit profile / creator card and launcher buttons */
+
+    /* 1) Any fixed bottom-right launcher that opens the profile/about dialog */
+    div[aria-label="Streamlit launcher"],
+    div[aria-label="About this app"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"],
+    a[href*="streamlit.io"],
+    a[href*="streamlit.app"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* 2) Fallback: hide any fixed buttons in the bottom-right corner */
+    div[style*="position: fixed"][style*="bottom"][style*="right"] {
+        z-index: -1 !important;   /* push behind everything */
+        opacity: 0 !important;    /* invisible if it still renders */
+        pointer-events: none !important;  /* not clickable */
+    }
+
     /* Hide Streamlit footer (Created by…) */
     footer {
         visibility: hidden !important;
     }
-    
+
     /* Hide footer elements */
     footer[data-testid="stFooter"] {
         display: none !important;
@@ -36,32 +56,23 @@ st.markdown(
         display: none !important;
         visibility: hidden !important;
     }
-    
+
     /* Hide Streamlit deploy button (older versions) */
     .stDeployButton {
         display: none !important;
         visibility: hidden !important;
     }
-    
+
     /* Hide fork button and GitHub menu */
     #MainMenu {
         visibility: hidden !important;
     }
-    
-    /* Hide menu button */
+
+    /* Hide "View the source code" button */
     button[title="View the source code"] {
         display: none !important;
     }
-    
-    /* Hide top decoration bar */
-    #stDecoration {
-        display: none !important;
-    }
-    
-    # /* Hide header menu */
-    # header[data-testid="stHeader"] {
-    #     display: none !important;
-    # }
+
     /* Make header minimal but keep sidebar toggle visible */
     header[data-testid="stHeader"] {
         background-color: transparent;
