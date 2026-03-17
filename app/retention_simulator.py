@@ -58,9 +58,14 @@ st.markdown(
         display: none !important;
     }
     
-    /* Hide header menu */
+    # /* Hide header menu */
+    # header[data-testid="stHeader"] {
+    #     display: none !important;
+    # }
+    /* Make header minimal but keep sidebar toggle visible */
     header[data-testid="stHeader"] {
-        display: none !important;
+        background-color: transparent;
+        box-shadow: none;
     }
 
     /* Improve main content padding slightly */
